@@ -17,12 +17,16 @@ public class PaddleMovement : MonoBehaviour
         movementDirection = Input.GetAxisRaw("Horizontal");
         if(movementDirection > 0 )
         {
-            rigidbody2D.AddForce(Vector2.right * movementSpeed);
-            // transform.Translate(Vector3.right * movementSpeed);
+            rigidbody2D.linearVelocity = Vector2.right * movementSpeed; // Perfect for moving the paddle, because it gives us a constant speed, while AddForce would give us an increasing speed, and transform.Translate would move the paddle regardless of physics, which can cause issues with collisions and boundaries.
+
+            
+            // rigidbody2D.AddForce(Vector2.right * movementSpeed); Ball moves slow in start, fast after a while, so we use linearVelocity instead of AddForce
+            // transform.Translate(Vector3.right * movementSpeed); //Ball goes out of the screen when using this method, so we use AddForce instead
         }
         else if(movementDirection < 0)
         {
-            rigidbody2D.AddForce(-Vector2.right * movementSpeed);
+            rigidbody2D.linearVelocity = -Vector2.right * movementSpeed;
+            // rigidbody2D.AddForce(-Vector2.right * movementSpeed);
             // transform.Translate(-Vector3.right * movementSpeed);
         }
         else
