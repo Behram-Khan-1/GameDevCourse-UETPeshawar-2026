@@ -27,35 +27,41 @@ public class Movement : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    // FPS is 100 - 200 - 60 - 120
+    void Update() 
     {
         HandleMovement();
         HandleJump();
     }
 
+    // Called every fixed framerate frame, good for physics calculations
+    //50 times per second by default, but can be changed in Time settings
     void FixedUpdate()
     {
         // check ground state using physics in FixedUpdate
         if (groundCheck != null)
         {
-            isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+            bool groundResult = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+            isGrounded = groundResult;
+
         }
     }
-        bool isIdle;
+
+    bool isIdle;
     private void HandleMovement()
     {
-        float horiz = Input.GetAxisRaw("Horizontal");
+        float horizInput = Input.GetAxisRaw("Horizontal");
         Vector2 vel = rb.linearVelocity;
-        vel.x = horiz * moveSpeed;
-        rb.linearVelocity = vel;
-        if(horiz > 0)
+        vel.x = horizInput * moveSpeed;
+        rb.linearVelocityX = vel.x;
+        if(horizInput > 0)
         {
-            transform.localScale = new Vector3(1, 1, 1); // flip sprite based on direction
+            // transform.localScale = new Vector3(1, 1, 1); // flip sprite based on direction
             isIdle = false;
         }
-        else if(horiz < 0)
+        else if(horizInput < 0)
         {
-            transform.localScale = new Vector3(-1, 1, 1); // flip sprite based on direction
+            // transform.localScale = new Vector3(-1, 1, 1); // flip sprite based on direction
             isIdle = false;
         }
         else
@@ -71,7 +77,7 @@ public class Movement : MonoBehaviour
         {
             Vector2 vel = rb.linearVelocity;
             vel.y = jumpForce;
-            rb.linearVelocity = vel;
+            rb.linearVelocityY = vel.y;
         }
     }
 
