@@ -1,6 +1,7 @@
 using UnityEngine;
+using UnityEngine.XR;
 
-public class Movement : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -10,10 +11,15 @@ public class Movement : MonoBehaviour
     public Transform groundCheck;
     public float groundCheckRadius = 0.2f;
     public LayerMask groundLayer;
+    private bool isGrounded;
+
+    [Header("Attack Settings")]
+    [SerializeField] bool isAttacking;
+    public float attackCooldown = 1f;
+    [SerializeField] float lastAttackTime;
 
     Animator animator;
     private Rigidbody2D rb;
-    private bool isGrounded;
 
     // Called when the script instance is being loaded
     void Start()
@@ -24,14 +30,20 @@ public class Movement : MonoBehaviour
         {
             Debug.LogError("Movement requires a Rigidbody2D on the same GameObject.");
         }
+
+        lastAttackTime = attackCooldown; // L = 5
     }
 
     // Update is called once per frame
     // FPS is 100 - 200 - 60 - 120
     void Update() 
     {
-        HandleMovement();
-        HandleJump();
+        if(!isAttacking)
+        {
+            HandleMovement();
+            HandleJump();
+        }
+        HandleAttack();
     }
 
     // Called every fixed framerate frame, good for physics calculations
@@ -47,6 +59,27 @@ public class Movement : MonoBehaviour
         }
     }
 
+    private void HandleAttack()
+    {
+        if (Input.GetMouseButtonDown(0) && !isAttacking) // left mouse button
+        {
+            isAttacking = true;
+            animator.SetTrigger("Attack");
+            lastAttackTime = 0f; // reset cooldown timer
+        }
+        else
+        {
+            lastAttackTime += Time.deltaTime; // increment cooldown timer
+            if (lastAttackTime >= attackCooldown)
+            {
+                isAttacking = false; // allow attacking again after cooldown
+            }
+        }
+
+
+
+    }
+
     bool isIdle;
     private void HandleMovement()
     {
@@ -56,12 +89,12 @@ public class Movement : MonoBehaviour
         rb.linearVelocityX = vel.x;
         if(horizInput > 0)
         {
-            // transform.localScale = new Vector3(1, 1, 1); // flip sprite based on direction
+            transform.localScale = new Vector3(1, 1, 1); // flip sprite based on direction
             isIdle = false;
         }
         else if(horizInput < 0)
         {
-            // transform.localScale = new Vector3(-1, 1, 1); // flip sprite based on direction
+            transform.localScale = new Vector3(-1, 1, 1); // flip sprite based on direction
             isIdle = false;
         }
         else
@@ -79,6 +112,11 @@ public class Movement : MonoBehaviour
             vel.y = jumpForce;
             rb.linearVelocityY = vel.y;
         }
+    }
+
+    public void EndAttack()
+    {
+        isAttacking = false;
     }
 
     void OnDrawGizmosSelected()
