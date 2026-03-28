@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -10,10 +10,15 @@ public class Movement : MonoBehaviour
     public Transform groundCheck;
     public float groundCheckRadius = 0.2f;
     public LayerMask groundLayer;
+    private bool isGrounded;
+
+    [Header("Attack Settings")]
+    [SerializeField] private bool isAttacking;
+    [SerializeField] private float attackCooldown = 1f; // Time in seconds between attacks
+    [SerializeField] private float lastAttackTime; // Timer to track time since last attack
 
     Animator animator;
     private Rigidbody2D rb;
-    private bool isGrounded;
 
     // Called when the script instance is being loaded
     void Start()
@@ -32,6 +37,7 @@ public class Movement : MonoBehaviour
     {
         HandleMovement();
         HandleJump();
+        HandleAttack();
     }
 
     // Called every fixed framerate frame, good for physics calculations
@@ -47,6 +53,22 @@ public class Movement : MonoBehaviour
         }
     }
 
+    void HandleAttack()
+    {
+        if (Input.GetMouseButtonDown(0) && !isAttacking) // left mouse button
+        {
+            isAttacking = true;
+            lastAttackTime = 0f; // reset cooldown timer
+            animator.SetTrigger("Attack");
+        }
+        //1 sec -> 0.1, 0.2 0.33, 0.39 , after 1 real sec -> 1 value
+        lastAttackTime = lastAttackTime + Time.deltaTime; // increment timer by time since last frame
+        if(lastAttackTime >= attackCooldown)
+        {
+            isAttacking = false; // reset attack state after cooldown
+        }
+    }
+
     bool isIdle;
     private void HandleMovement()
     {
@@ -56,12 +78,12 @@ public class Movement : MonoBehaviour
         rb.linearVelocityX = vel.x;
         if(horizInput > 0)
         {
-            // transform.localScale = new Vector3(1, 1, 1); // flip sprite based on direction
+            transform.localScale = new Vector3(1, 1, 1); // flip sprite based on direction
             isIdle = false;
         }
         else if(horizInput < 0)
         {
-            // transform.localScale = new Vector3(-1, 1, 1); // flip sprite based on direction
+            transform.localScale = new Vector3(-1, 1, 1); // flip sprite based on direction
             isIdle = false;
         }
         else
