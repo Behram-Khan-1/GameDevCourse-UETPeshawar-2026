@@ -102,6 +102,16 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocityY = vel.y;
         }
     }
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            // Here you can add logic to damage the player, play an effect, etc.
+            Debug.Log("Player hit by enemy!");
+            
+            GameManagerPlatformer.Instance.GameOver(); // Notify the game manager about the game over
+        }
+    }
 
     void OnDrawGizmosSelected()
     {
